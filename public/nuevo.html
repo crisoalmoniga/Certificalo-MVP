@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nuevo certificado</title>
+</head>
+<body>
+  <h1>Nuevo certificado</h1>
+
+  <form id="certificate-form">
+    <div>
+      <label>Cliente:</label>
+      <input type="text" name="cliente_nombre" required />
+    </div>
+
+    <div>
+      <label>Dirección:</label>
+      <input type="text" name="cliente_direccion" required />
+    </div>
+
+    <div>
+      <label>Fecha de tratamiento:</label>
+      <input type="date" name="fecha_tratamiento" required />
+    </div>
+
+    <div>
+      <label>Fecha de vencimiento:</label>
+      <input type="date" name="fecha_vencimiento" required />
+    </div>
+
+    <fieldset>
+      <legend>Servicios realizados</legend>
+      <label><input type="checkbox" name="servicios" value="DESRATIZACION" /> Desratización</label><br />
+      <label><input type="checkbox" name="servicios" value="DESINSECTACION" /> Desinsectación</label><br />
+      <label><input type="checkbox" name="servicios" value="DESINFECCION" /> Desinfección</label>
+    </fieldset>
+
+    <div>
+      <label>Nombre firmante:</label>
+      <input type="text" name="firma_nombre" />
+    </div>
+
+    <div>
+      <label>Cargo firmante:</label>
+      <input type="text" name="firma_cargo" />
+    </div>
+
+    <button type="submit">Guardar certificado</button>
+  </form>
+
+  <pre id="result"></pre>
+
+  <script src="js/api.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>
