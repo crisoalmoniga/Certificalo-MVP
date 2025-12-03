@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const puppeteer = require("puppeteer");
 
+// Ruta al template HTML
 const templatePath = path.join(
   __dirname,
   "..",
@@ -13,8 +14,6 @@ const templatePath = path.join(
 
 // Carpeta donde vamos a guardar los PDFs generados
 const pdfDir = path.join(__dirname, "..", "..", "pdfs");
-
-// Nos aseguramos de que exista la carpeta pdfs
 if (!fs.existsSync(pdfDir)) {
   fs.mkdirSync(pdfDir, { recursive: true });
   console.log("Carpeta de PDFs creada en:", pdfDir);
@@ -24,10 +23,12 @@ console.log("Ruta del template de certificado:", templatePath);
 
 function formatDate(iso) {
   if (!iso) return "";
-  return iso; // de momento lo dejamos YYYY-MM-DD
+  return iso; // por ahora dejamos el formato YYYY-MM-DD
 }
 
-// --- Render de HTML a partir del certificado -------------------------------
+// ---------------------------------------------------------------------------
+// Renderizar HTML a partir de un certificado
+// ---------------------------------------------------------------------------
 function renderCertificateHtml(cert) {
   console.log("Renderizando HTML para certificado ID:", cert.id);
 
@@ -65,19 +66,50 @@ function renderCertificateHtml(cert) {
   return html;
 }
 
-// --- Generar PDF con Puppeteer --------------------------------------------
+// ---------------------------------------------------------------------------
+// Config de lanzamiento de Puppeteer según entorno
+// ---------------------------------------------------------------------------
+function getLaunchOptions() {
+  // Consideramos "producción" cuando esté en hosting
+  const isProd =
+    process.env.NODE_ENV === "production" ||
+    process.env.RENDER ||
+    process.env.RENDER_EXTERNAL_URL;
+
+  if (!isProd) {
+    // 💻 Desarrollo local (tu máquina): sin flags raros
+    return {
+      headless: "new",
+    };
+  }
+
+  // 🛰 Hosting (Render / Railway): necesitamos estos flags
+  return {
+    headless: "new",
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu"
+    ],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Generar PDF con Puppeteer a partir del certificado
+// ---------------------------------------------------------------------------
 async function generateCertificatePdf(cert) {
   const html = renderCertificateHtml(cert);
 
-  // nombre del archivo (usamos id si existe, si no numero)
-  const baseName = cert.id ? `certificado-${cert.id}` : `certificado-num-${cert.numero}`;
+  const baseName = cert.id
+    ? `certificado-${cert.id}`
+    : `certificado-num-${cert.numero || "sindato"}`;
+
   const pdfPath = path.join(pdfDir, `${baseName}.pdf`);
 
   console.log("Generando PDF en:", pdfPath);
 
-  const browser = await puppeteer.launch({
-    headless: "new", // para Puppeteer moderno
-  });
+  const browser = await puppeteer.launch(getLaunchOptions());
 
   try {
     const page = await browser.newPage();

@@ -1,26 +1,41 @@
+// server/app.js
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
-const certificatesRoutes = require("./routes/certificates");
+
+const certificatesRouter = require("./routes/certificates");
+const db = require("./db/db"); // Conecta SQLite
 
 const app = express();
-const PORT = 3000;
+
+// =========================
+// CONFIGURACIONES
+// =========================
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static
+// Servir archivos estáticos del frontend
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-// API
-app.use("/api/certificates", certificatesRoutes);
+// =========================
+// RUTAS API
+// =========================
+app.use("/api/certificates", certificatesRouter);
 
-// Home -> index.html
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "..", "public", "index.html"));
+// =========================
+// RUTA 404 GENÉRICA (opcional)
+// =========================
+app.use((req, res) => {
+  res.status(404).send("Recurso no encontrado");
 });
 
+// =========================
+// INICIO DEL SERVIDOR
+// =========================
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log("SQLite conectado:", db ? "ok" : "sin conexión");
 });
